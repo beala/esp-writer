@@ -5,7 +5,7 @@ import System.Hardware.Serialport
 import qualified Data.ByteString.Char8 as B
 import qualified Options.Applicative as OP
 import Data.Monoid ((<>))
-import Control.Monad (when)
+import Control.Monad (when, forever)
 
 data Config = Config { configPort :: String
                      , configFilePath :: String
@@ -25,7 +25,7 @@ main = do
     readUntilPrompt s B.empty >>= B.putStr
     scriptContents <- B.readFile scriptPath
     writeToFile s scriptName scriptContents
-    when (configExecAfter config) (sendReadPrint s (doFileCommand scriptName))
+    when (configExecAfter config) (sendReadPrint s (doFileCommand scriptName) >> forever (recv s 128 >>= B.putStr))
     closeSerial s
     putStrLn ""
 
